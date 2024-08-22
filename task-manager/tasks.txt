@@ -1,1 +1,2 @@
-[]
+NaN|undefined|false
+1724349420352|food|true

@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 
 function readTasks() {
   if (!fs.existsSync(tasksFilePath)) {
-    fs.writeFileSync(tasksFilePath, '');
+    fs.writeFileSync(tasksFilePath, ''); // Create an empty file if it doesn't exist
   }
   const tasksData = fs.readFileSync(tasksFilePath, 'utf-8').trim();
   if (!tasksData) return [];
