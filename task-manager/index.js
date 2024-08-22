@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
-const tasksFilePath = path.join(__dirname, 'tasks.json');
+const tasksFilePath = path.join(__dirname, 'tasks.txt');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -11,14 +11,23 @@ const rl = readline.createInterface({
 
 function readTasks() {
   if (!fs.existsSync(tasksFilePath)) {
-    fs.writeFileSync(tasksFilePath, JSON.stringify([]));
+    fs.writeFileSync(tasksFilePath, '');
   }
-  const tasksData = fs.readFileSync(tasksFilePath, 'utf-8');
-  return JSON.parse(tasksData);
+  const tasksData = fs.readFileSync(tasksFilePath, 'utf-8').trim();
+  if (!tasksData) return [];
+  return tasksData.split('\n').map(line => {
+    const [id, description, completed] = line.split('|');
+    return {
+      id: parseInt(id, 10),
+      description,
+      completed: completed === 'true'
+    };
+  });
 }
 
 function writeTasks(tasks) {
-  fs.writeFileSync(tasksFilePath, JSON.stringify(tasks, null, 2));
+  const tasksData = tasks.map(task => `${task.id}|${task.description}|${task.completed}`).join('\n');
+  fs.writeFileSync(tasksFilePath, tasksData);
 }
 
 function addTask() {
@@ -43,7 +52,7 @@ function viewTasks() {
 function markTaskAsComplete() {
   rl.question('Enter the task ID to mark as complete: ', (id) => {
     const tasks = readTasks();
-    const task = tasks.find(t => t.id === parseInt(id));
+    const task = tasks.find(t => t.id === parseInt(id, 10));
     if (task) {
       task.completed = true;
       writeTasks(tasks);
@@ -58,7 +67,7 @@ function markTaskAsComplete() {
 function removeTask() {
   rl.question('Enter the task ID to remove: ', (id) => {
     let tasks = readTasks();
-    tasks = tasks.filter(task => task.id !== parseInt(id));
+    tasks = tasks.filter(task => task.id !== parseInt(id, 10));
     writeTasks(tasks);
     console.log('Task removed.');
     showMenu();
